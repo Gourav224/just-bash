@@ -40,7 +40,6 @@ export function createInitialState(
     appendBuffer: [],
     substitutionMade: false,
     lineNumberOutput: [],
-    nCommandOutput: [],
     restartCycle: false,
     inDRestartedCycle: false,
     currentFilename: filename,
@@ -878,6 +877,8 @@ function executeTransliterate(
 export interface ExecuteContext {
   lines: string[];
   currentLineIndex: number;
+  /** -n: the n command does not print the pattern space. */
+  silent?: boolean;
 }
 
 export function executeCommands(
@@ -926,11 +927,12 @@ export function executeCommands(
         )
       ) {
         state.coverage?.hit("sed:cmd:next");
-        // Output current pattern space (will be handled by caller based on silent mode)
-        // nCommandOutput respects silent mode - won't print if -n is set
-        state.nCommandOutput.push(state.patternSpace);
-        // Don't set state.printed = true here, as that would trigger silent mode print
-        // The nCommandOutput mechanism handles the output properly
+        // Print the pattern space unless -n. It shares the queue with p, =
+        // and l so the output stays in command order. Don't set
+        // state.printed, which would trigger the silent-mode print.
+        if (!ctx?.silent) {
+          state.lineNumberOutput.push(state.patternSpace);
+        }
 
         if (
           ctx &&
@@ -948,7 +950,7 @@ export function executeCommands(
         } else {
           // If no next line, n quits after printing
           // Mark as deleted to prevent auto-print of the pattern space
-          // (we already printed it via lineNumberOutput)
+          // (we already printed it above)
           state.quit = true;
           state.deleted = true;
           break;
