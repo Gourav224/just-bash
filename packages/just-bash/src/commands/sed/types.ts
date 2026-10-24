@@ -301,6 +301,7 @@ export interface SedState {
   changedText?: string; // For c command: text to output in place of pattern space
   substitutionMade: boolean; // Track if substitution was made (for 't' command)
   lineNumberOutput: string[]; // Output from p, P, =, l, F and n, in command order
+  lineOutputBeforeNextLine: number; // Leading lineNumberOutput entries printed before n read another line
   restartCycle: boolean; // For D command: restart cycle without reading new line
   inDRestartedCycle: boolean; // Track if we're in a cycle restarted by D
   currentFilename?: string; // For F command

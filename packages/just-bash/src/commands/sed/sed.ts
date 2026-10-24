@@ -237,7 +237,8 @@ async function processContent(
     lastPattern = state.lastPattern;
 
     // Output from p, P, =, l, F and n, in command order
-    const hadLineNumberOutput = state.lineNumberOutput.length > 0;
+    const hadLineNumberOutput =
+      state.lineNumberOutput.length > state.lineOutputBeforeNextLine;
     for (const ln of state.lineNumberOutput) {
       appendOutput(`${ln}\n`);
     }

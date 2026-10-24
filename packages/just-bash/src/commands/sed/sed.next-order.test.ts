@@ -39,4 +39,19 @@ describe("sed n prints in command order", () => {
       exitCode: 0,
     });
   });
+
+  it("keeps the newline of a line n printed before reading the next", async () => {
+    // Output checked against GNU sed 4.9 with input 'a\nb\nc' (no final newline)
+    const cases: Array<[string, string]> = [
+      ["n;n;d", "a\nb\n"],
+      ["n;d", "a\nc"],
+      ["n;p;d", "a\nb\nc"],
+      ["p;n;d", "a\na\nc\nc"],
+    ];
+    for (const [script, stdout] of cases) {
+      const env = new Bash();
+      const result = await env.exec(`printf 'a\\nb\\nc' | sed '${script}'`);
+      expect({ script, stdout: result.stdout }).toEqual({ script, stdout });
+    }
+  });
 });

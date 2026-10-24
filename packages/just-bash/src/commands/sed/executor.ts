@@ -40,6 +40,7 @@ export function createInitialState(
     appendBuffer: [],
     substitutionMade: false,
     lineNumberOutput: [],
+    lineOutputBeforeNextLine: 0,
     restartCycle: false,
     inDRestartedCycle: false,
     currentFilename: filename,
@@ -940,6 +941,9 @@ export function executeCommands(
             ctx.lines.length
         ) {
           state.linesConsumedInCycle++;
+          // Everything printed so far belongs to earlier lines, so its
+          // newline stays even when the input has no final newline
+          state.lineOutputBeforeNextLine = state.lineNumberOutput.length;
           const nextLine =
             ctx.lines[ctx.currentLineIndex + state.linesConsumedInCycle];
           state.patternSpace = nextLine;
