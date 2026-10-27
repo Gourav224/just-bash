@@ -191,6 +191,38 @@ describe("sed advanced commands", () => {
       expect(result).toMatchObject({ stdout: "y\n", stderr: "", exitCode: 0 });
     });
 
+    it("appends an empty line for a trailing a\\ in a script file", async () => {
+      const env = new Bash({
+        files: { "/a.sed": "1a\\\n" },
+      });
+      const result = await env.exec("printf 'x\\ny\\n' | sed -f /a.sed");
+      expect(result).toMatchObject({
+        stdout: "x\n\ny\n",
+        stderr: "",
+        exitCode: 0,
+      });
+    });
+
+    it("runs -f and -e scripts in command-line order", async () => {
+      const env = new Bash({
+        files: { "/ab.sed": "s/A/B/\n" },
+      });
+      const result = await env.exec("echo A | sed -f /ab.sed -e 's/B/C/'");
+      expect(result).toMatchObject({ stdout: "C\n", stderr: "", exitCode: 0 });
+    });
+
+    it("honors #n in a script file given before -e", async () => {
+      const env = new Bash({
+        files: { "/n.sed": "#n\n" },
+      });
+      const result = await env.exec("printf 'x\\ny\\n' | sed -f /n.sed -e p");
+      expect(result).toMatchObject({
+        stdout: "x\ny\n",
+        stderr: "",
+        exitCode: 0,
+      });
+    });
+
     it("reports error for missing script file", async () => {
       const env = new Bash({
         files: { "/test.txt": "hello\n" },
